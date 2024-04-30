@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Información del Tiempo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 1px solid #3b3434;
+      border-radius: 5px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .weather-info {
+      margin-top: 20px;
+    }
+    input[type="text"] {
+      width: calc(100% - 10px);
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    input[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Información del Tiempo</h1>
+    <form id="searchForm">
+      <input type="text" id="provinciaInput" placeholder="Código de provincia...">
+      <input type="text" id="municipioInput" placeholder="Código de municipio...">
+      <input type="submit" value="Buscar">
+    </form>
+    <div class="weather-info" id="weatherInfo">
+      <p> La aplicacion funciona de la siguiente manera: en el cuadro de dialogo superior pones el código de provincia y en el inferior el código de municipio </p>
+      <p>EJEMPLOS PARA USAR: Provincia: 01, 28, 07 /// Muncipios: 01003 , 28005, 07004. Los números de provincia deben coincidir con los 2 primeros números del municipio</p> 
+    </div>
+  </div>
+
+  <script>
+  
+    document.addEventListener('DOMContentLoaded', function () {
+      const searchForm = document.getElementById('searchForm');
+      const provinciaInput = document.getElementById('provinciaInput');
+      const municipioInput = document.getElementById('municipioInput');
+
+      searchForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const provincia = provinciaInput.value.trim();
+        const municipio = municipioInput.value.trim();
+        if (provincia !== '' && municipio !== '') {
+          fetch(`https://corsproxy.io/?https://www.el-tiempo.net/api/json/v2/provincias/${provincia}/municipios/${municipio}`)
+            .then(response => response.json())
+            .then(data => {
+              const weatherInfo = document.getElementById('weatherInfo');
+              const weatherData = `
+                <p><strong>Nombre:</strong> ${data.municipio.NOMBRE}</p>
+                <p><strong>Temperatura:</strong> ${data.temperatura_actual}°C</p>
+                <p><strong>Humedad:</strong> ${data.humedad}%</p>
+                <p><strong>Descripción:</strong> ${data.stateSky.description}</p>
+              `;
+              weatherInfo.innerHTML = weatherData;
+            })
+            .catch(error => {
+              const weatherInfo = document.getElementById('weatherInfo');
+              weatherInfo.innerHTML = `<p>No se han encontraron datos para el lugar especificado.</p>`;
+              console.error('Error a la hora obtener los datos del tiempo:', error);
+            });
+        }
+      });
+    });
+    
+  </script>
+</body>
+</html>
